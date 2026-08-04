@@ -3,7 +3,7 @@ from typing import Any
 
 from dotenv import set_key
 
-from enginess.contracts.setttings import get_settings, ENV_FILE, Settings, reload_settings
+from engines.contracts.settings import get_settings, ENV_FILE, Settings, reload_settings
 
 ALLOWED_CONFIG_KEYS = [
     "DB_HOST", "DB_PORT", "DB_USER", "DB_NAME",

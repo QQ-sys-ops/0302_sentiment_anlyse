@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.schemas.system_schema import ConfigResponse, ConfigUpdateRequest
-from app.dependenices import SystemConfigServiceDep
+from app.dependencies import SystemConfigServiceDep
 
 router = APIRouter(prefix="/api/config", tags=["配置信息接口层"])
 
