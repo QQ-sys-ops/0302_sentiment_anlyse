@@ -2,7 +2,7 @@ from typing import Callable, Awaitable
 
 from engines.common.llm import LLMClient
 from engines.common.logger import router_log_by_role
-from engines.contracts.role_rules import RoleKey
+from engines.contracts.agent_roles import RoleKey
 from engines.common.task_manager import research_task_manager
 from engines.common.reports import get_output_dir
 from engines.media_agent.agent import media_agent_handler
@@ -21,7 +21,6 @@ class OrchestratorAgent:
 
     def dispatch_task(self, query: str, task_id: str):
         for role in self._agent_handlers:
-            # 异步启动两个协程对象给我并发的执行
             research_task_manager.submit_task(self.execute_research_task(query, task_id, role))
 
     async def execute_research_task(self, query: str, task_id: str, role: RoleKey):

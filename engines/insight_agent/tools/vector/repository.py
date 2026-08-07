@@ -4,11 +4,11 @@ from datetime import datetime
 from typing import Any
 from loguru import logger
 
-from pymilvus import AnnSearchRequest, MilvusClient, RRFRanker,WeightedRanker
+from pymilvus import AnnSearchRequest, MilvusClient, RRFRanker
 
 from engines.contracts.evidence import Engagement
 from engines.contracts.settings import get_settings
-from engines.insight_agent.tools.search_results import DocumentRecord, SearchHit
+from engines.insight_agent.tools.search_results import EvidenceDocument, SearchHit
 from engines.insight_agent.tools.vector.embedder import VectorEmbedder
 from engines.insight_agent.tools.vector.builder import (
     CollectionSchemaBuilder,
@@ -62,7 +62,7 @@ class VectorSearchRepository:
 
     # ==================== 1. 写操作====================
 
-    def upsert_documents(self, documents: list[DocumentRecord]) -> int:
+    def upsert_documents(self, documents: list[EvidenceDocument]) -> int:
         """批量向量化并写入 Milvus 集合。"""
 
         self.ensure_collection()
@@ -85,7 +85,7 @@ class VectorSearchRepository:
 
     @staticmethod
     def _to_milvus_entity(
-            document: DocumentRecord,
+            document: EvidenceDocument,
             dense_vector: list[float],
             sparse_vector: dict[int, float],
     ) -> dict[str, Any]:
@@ -169,8 +169,8 @@ class VectorSearchRepository:
             hits.append(
                 SearchHit(
                     retrieval_score=float(hit_dict.get("distance")),
-                    retrieval_channel="semantic_recall",
-                    retrieval_document=DocumentRecord(
+                    retrieval_channel="vector_call",
+                    retrieval_document=EvidenceDocument(
                         platform=entity["platform"],
                         source_table=entity["source_table"],
                         mysql_primary_key=entity["mysql_primary_key"],

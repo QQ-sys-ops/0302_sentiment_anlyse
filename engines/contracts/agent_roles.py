@@ -2,7 +2,6 @@ from typing import Literal
 from dataclasses import  dataclass
 RoleKey=Literal["insight","media","host","report"]
 
-
 @dataclass(slots=True)
 class RoleInfo:
     confix_prefix:str     # 角色的配置前缀

@@ -21,10 +21,10 @@ class RetryConfig:
         429:限流
 
         """
-        stauts_code = getattr(exec, 'status_code', None)
-        if stauts_code is None:
-            stauts_code = getattr(getattr(exec, 'response', None), 'status_code', None)
-        return isinstance(stauts_code, int) and 400 <= stauts_code < 500 and stauts_code != 429
+        status_code = getattr(exec, 'status_code', None)
+        if status_code is None:
+            status_code = getattr(getattr(exec, 'response', None), 'status_code', None)
+        return isinstance(status_code, int) and 400 <= status_code < 500 and status_code != 429
 
     def get_retry_delay(self,
                         fun_name: str,
@@ -32,7 +32,7 @@ class RetryConfig:
                         exec: Exception) -> float | None:
 
         # 1. 不可以重试
-        if self._is_no_retrable or attempt >= self.max_retries:
+        if self._is_no_retrable(exec) or attempt >= self.max_retries:
             return None
 
         # 2. 计算下一次延时事件
@@ -71,4 +71,4 @@ async def with_retry(func):
                   raise ValueError(f"{func.__name__}不可在重试")
               await asyncio.sleep(delay)
 
-    return wrapper()
+    return wrapper

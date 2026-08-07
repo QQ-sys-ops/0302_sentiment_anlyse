@@ -6,7 +6,7 @@ from dataclasses import  fields
 
 from engines.contracts.evidence import Engagement
 from engines.insight_agent.tools.db_connection import DataBaseConnectionManager, connection_manager
-from engines.insight_agent.tools.search_results import SearchResult, DocumentRecord
+from engines.insight_agent.tools.search_results import SearchResult, EvidenceDocument
 from engines.insight_agent.tools.sql import db_sql_statement
 
 
@@ -25,8 +25,8 @@ class DatabaseSearchRepository:
         return SearchResult(retrieval_channel="db_call",
                             retrieval_results=[self._map_row_to_document(row) for row in rows])
 
-    def _map_row_to_document(self, row: dict[str, Any]) -> DocumentRecord:
-        return DocumentRecord(
+    def _map_row_to_document(self, row: dict[str, Any]) -> EvidenceDocument:
+        return EvidenceDocument(
             platform=row["platform"],
             source_table=row["source_table"],
             mysql_primary_key=row["mysql_primary_key"],

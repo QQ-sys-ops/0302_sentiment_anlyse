@@ -8,7 +8,7 @@ from pydantic import Field
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import BaseMessage, SystemMessage, HumanMessage
 from pydantic import BaseModel
-from engines.contracts.role_rules import ROLE_INFOS, RoleKey
+from engines.contracts.agent_roles import ROLE_INFOS, RoleKey
 from engines.contracts.settings import get_settings
 
 T = TypeVar("T", bound=BaseModel)  # BaseModel类型
