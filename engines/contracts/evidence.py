@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
+from typing import Any
 
 
 @dataclass(slots=True)
@@ -9,7 +10,6 @@ class Engagement:
     shares: float
     collects: float
     replies: float
-
 
 
 @dataclass(slots=True)
@@ -28,7 +28,6 @@ class EvidenceDocument:
     def doc_id(self) -> str:
         """根据来源字段生成稳定文档标识。"""
         return f"{self.platform}:{self.source_table}:{self.mysql_primary_key}"
-
 
 
 @dataclass(slots=True)
@@ -51,5 +50,66 @@ class EvidenceRecord:
         return self.document.doc_id
 
 
+@dataclass(slots=True)
+class EvidenceContext:
+    """供 LLM 提示词使用的已渲染证据上下文。"""
+
+    retrieval_text: str = ""
+    evidence_text: str = ""
 
 
+def build_evidence_context(
+        retrieval_text: str,
+        records: list[EvidenceRecord],
+        max_rendered: int,
+) -> EvidenceContext:
+    """统计命中数并渲染有限证据，构建 LLM 提示词上下文。"""
+    return EvidenceContext(
+        retrieval_text=retrieval_text,
+        evidence_text="\n\n".join(
+            _render_evidence_records(records[:max_rendered])
+        ),
+    )
+
+
+def _render_evidence_records(records: list[EvidenceRecord]) -> list[str]:
+    """将证据记录渲染为带稳定编号的 LLM 文本块。"""
+    return [
+        _render_evidence_record(record, evidence_number)
+        for evidence_number, record in enumerate(records, start=1)
+    ]
+
+
+def _render_evidence_record(record: EvidenceRecord, evidence_number: int) -> str:
+    document = record.document
+    fields = (
+        ("平台/检索提供方", document.platform),
+        ("来源表/工具", document.source_table),
+        ("命中查询", " / ".join(record.retrieval.matched_queries)),
+        ("内容", _truncate_content(document.content)),
+        ("发布时间/抓取时间", document.published_at),
+        ("热度分", document.hotness_score),
+        ("互动数据", _render_engagement(document.engagement))
+    )
+    lines = [f"[证据 {evidence_number}]"]
+    lines.extend(f"{label}: {value}" for label, value in fields if value)
+    return "\n".join(lines)
+
+
+
+def _truncate_content(content: str, max_length: int = 3000) -> str:
+    if len(content) <= max_length:
+        return content
+    return content[:max_length] + "..."
+
+
+
+def _render_engagement(engagement: dict[str,Any]) -> str:
+    values = (
+        ("点赞", engagement['likes']),
+        ("评论", engagement['comments']),
+        ("转发", engagement['shares']),
+        ("收藏", engagement['collects']),
+        ("回复", engagement['replies']),
+    )
+    return " / ".join(f"{label} {value}" for label, value in values)

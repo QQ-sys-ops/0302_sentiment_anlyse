@@ -2,7 +2,7 @@
 import asyncio
 from datetime import datetime
 from typing import Any
-from dataclasses import  fields
+from dataclasses import fields, dataclass
 
 from engines.contracts.evidence import Engagement
 from engines.insight_agent.tools.db_connection import DataBaseConnectionManager, connection_manager

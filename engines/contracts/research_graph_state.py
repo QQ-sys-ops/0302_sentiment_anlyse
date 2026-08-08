@@ -1,10 +1,18 @@
 """Insight 与 Media 研究图共享的状态契约。"""
-
+import dataclasses
 from typing import Generic, TypeVar
 
 from typing_extensions import NotRequired, TypedDict
 
 from engines.contracts.agent_roles import RoleKey
+
+
+@dataclasses.dataclass
+class User:
+    name:str
+    age:int
+
+
 
 
 class SectionState(TypedDict):
@@ -13,6 +21,7 @@ class SectionState(TypedDict):
     section_key: str
     title: str
     body: NotRequired[str]
+
 
 
 SectionStateT = TypeVar("SectionStateT", bound=SectionState)
