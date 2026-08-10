@@ -173,7 +173,7 @@ class VectorSearchRepository:
                     retrieval_document=EvidenceDocument(
                         platform=entity["platform"],
                         source_table=entity["source_table"],
-                        mysql_primary_key=entity["mysql_primary_key"],
+                        source_id=entity["mysql_primary_key"],
                         content=entity["content"],
                         published_at=datetime.fromtimestamp(
                             int(entity.get("published_at"))

@@ -49,7 +49,7 @@ class RetryConfig:
 retry_config = RetryConfig()
 
 
-async def with_retry(func):
+def with_retry(func):
     """
     闭包使用
     :param func:

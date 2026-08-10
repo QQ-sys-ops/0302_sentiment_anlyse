@@ -35,7 +35,7 @@ def _is_semantic_enabled(records):
     settings = get_settings()
     return (
             bool(records)
-            and settings.INSIGHT_EMBEDDING_MODEL
+            and settings.INSIGHT_SEMANTIC_ROUTING_ENABLED
             and bool(settings.INSIGHT_SEMANTIC_ROUTING_MODEL)
     )
 

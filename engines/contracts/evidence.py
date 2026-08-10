@@ -18,16 +18,20 @@ class EvidenceDocument:
 
     platform: str
     source_table: str
-    mysql_primary_key: int
+    source_id: str
     content: str
-    published_at: datetime
+    published_at: datetime | str
     engagement: dict[str, float] = field(default_factory=dict)
     hotness_score: float = 0.0
+
+    url: str = ""
+    title: str = ""
+    source_name: str = ""
 
     @property
     def doc_id(self) -> str:
         """根据来源字段生成稳定文档标识。"""
-        return f"{self.platform}:{self.source_table}:{self.mysql_primary_key}"
+        return f"{self.platform}:{self.source_table}:{self.source_id}"
 
 
 @dataclass(slots=True)
@@ -83,8 +87,8 @@ def _render_evidence_records(records: list[EvidenceRecord]) -> list[str]:
 def _render_evidence_record(record: EvidenceRecord, evidence_number: int) -> str:
     document = record.document
     fields = (
-        ("平台/检索提供方", document.platform),
-        ("来源表/工具", document.source_table),
+        ("平台/站点", document.platform),
+        ("来源表/网页数据", document.source_table),
         ("命中查询", " / ".join(record.retrieval.matched_queries)),
         ("内容", _truncate_content(document.content)),
         ("发布时间/抓取时间", document.published_at),
@@ -96,20 +100,18 @@ def _render_evidence_record(record: EvidenceRecord, evidence_number: int) -> str
     return "\n".join(lines)
 
 
-
 def _truncate_content(content: str, max_length: int = 3000) -> str:
     if len(content) <= max_length:
         return content
     return content[:max_length] + "..."
 
 
-
-def _render_engagement(engagement: dict[str,Any]) -> str:
+def _render_engagement(engagement: dict[str, Any]) -> str:
     values = (
-        ("点赞", engagement['likes']),
-        ("评论", engagement['comments']),
-        ("转发", engagement['shares']),
-        ("收藏", engagement['collects']),
-        ("回复", engagement['replies']),
+        ("点赞", engagement.get('likes')),
+        ("评论", engagement.get('comments')),
+        ("转发", engagement.get('shares')),
+        ("收藏", engagement.get('collects')),
+        ("回复", engagement.get('replies')),
     )
     return " / ".join(f"{label} {value}" for label, value in values)

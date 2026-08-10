@@ -29,7 +29,7 @@ class DatabaseSearchRepository:
         return EvidenceDocument(
             platform=row["platform"],
             source_table=row["source_table"],
-            mysql_primary_key=row["mysql_primary_key"],
+            source_id=row["mysql_primary_key"],
             content=row.get('title_or_content') or '',
             published_at=datetime.fromtimestamp(row["published_at"]),
             engagement={
