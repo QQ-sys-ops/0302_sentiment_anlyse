@@ -50,26 +50,36 @@ class SectionReadyListener:
         """持续消费章节就绪事件并发布 Host 讨论事件"""
 
         while True:
+            # 1. 从队列中获取数据包
             event_payload = await self._event_queue.get()
+
+            # 2. 操作状态
             task_id = event_payload["task_id"]
             host_state = self._host_states.get(task_id)
             if host_state is None:
+                # 2.1初始化hostAgent图的状态
                 host_state = {
-                    "task_id": task_id,
-                    "section_pair_store": SectionPairStore(),
+                    "task_id": task_id,      # 任务ID
+                    "section_pair_store": SectionPairStore(),   # 章节对"存储"
                     "judgements": []
                 }
             invocation_state: HostState = {
                 **host_state,
                 "event_payload": event_payload
             }
+
+            # 3. 驱动graph图
             updated_state: HostState = await self._graph.ainvoke(invocation_state)
+
+            # 4. 操作状态
             discussion_events = updated_state["discussion_events"]
             self._host_states[task_id] = {
                 "task_id": task_id,
                 "section_pair_store": updated_state["section_pair_store"],
                 "judgements": updated_state["judgements"]
             }
+
+            # 5. 发布讨论消息事件类型
             for discussion_event in discussion_events:
                 logger.info(
                     f"【{role_display_name('host')}】发送讨论事件 "

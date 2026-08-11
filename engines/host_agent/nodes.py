@@ -36,7 +36,7 @@ class HostNodes:
         )
         return {
             "section_pair_store": state["section_pair_store"],
-            "discussion_events": discussion_events,
+            "discussion_events": discussion_events
         }
 
     async def generate_section_judgement(
@@ -61,9 +61,10 @@ class HostNodes:
         section_judgement = state["section_judgement"]
 
         state["section_pair_store"].mark_judged(section_judgement.section_key)
-        judgements = [*state["judgements"], section_judgement]
+
+        judgements = [*state["judgements"], section_judgement]   # 暂时不用管
         discussion_events = [
-            *state["discussion_events"],
+            *state["discussion_events"],    # 暂时不用管
             build_judgement_discussion_event(
                 state["task_id"],
                 section_judgement,

@@ -54,3 +54,15 @@ class SectionPairStore:
             insight=outputs["insight"],
             media=outputs["media"]
         )
+
+if __name__ == '__main__':
+
+
+
+    set1={"a","b"}
+
+    dict1={"a":"1","b":"2"}
+
+
+    print(set1.issuperset(dict1))
+
