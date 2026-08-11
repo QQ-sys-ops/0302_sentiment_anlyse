@@ -42,7 +42,7 @@ class OrchestratorAgent:
             output_dir = get_output_dir(task_id, role)
 
             # 3. 执行指定角色Agent的逻辑
-            self._agent_handlers[role](
+            await self._agent_handlers[role](
                 role,
                 query,
                 task_id,

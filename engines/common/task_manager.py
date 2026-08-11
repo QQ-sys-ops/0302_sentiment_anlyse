@@ -35,15 +35,23 @@ class ResearchTaskManager:
 
 
 
-    def  submit_task(self,coroutine:Coroutine):
+    def submit_task(self, coroutine: Coroutine) -> asyncio.Task:
         # 1. 将异步任务交给事件循环线程[没有开启新线程，用的还是事件循环的线程]
-        task=asyncio.create_task(coroutine)
+        task = asyncio.create_task(coroutine)
 
         # 2. 将异步任务对象存储到容器中
         self.async_tasks.add(task)
 
         # 3. 等异步任务做完 从容器中移除掉
-        task.add_done_callback(self.async_tasks.discard)   # 优雅写法
+        task.add_done_callback(self.async_tasks.discard)
+        return task
+
+    async def cancel_all_tasks(self) -> None:
+        tasks = tuple(task for task in self.async_tasks if not task.done())
+        for task in tasks:
+            task.cancel()
+        if tasks:
+            await asyncio.gather(*tasks, return_exceptions=True)
 
 
 

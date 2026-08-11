@@ -1,7 +1,7 @@
 
 import   uvicorn
 
-from  enginess.contracts.setttings import get_settings
+from  engines.contracts.settings import get_settings
 
 if __name__ == '__main__':
 
