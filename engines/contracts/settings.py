@@ -1,6 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
-from typing import Literal, Optional
+from typing import Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -15,13 +15,11 @@ class Settings(BaseSettings):
     HOST: str = Field("0.0.0.0", description="监听地址")
     PORT: int = Field(5000, description="监听端口")
 
-    DB_DIALECT: str = Field("mysql", description="数据库类型:mysql 或 postgresql")
     DB_HOST: str = Field("localhost", description="数据库主机")
     DB_PORT: int = Field(3306, description="数据库端口")
     DB_USER: str = Field("root", description="数据库用户名")
     DB_PASSWORD: str = Field("", description="数据库密码")
     DB_NAME: str = Field("media_crawler", description="数据库名称")
-    DB_CHARSET: str = Field("utf8mb4", description="字符集")
 
     INSIGHT_ENGINE_API_KEY: Optional[str] = Field(None, description="Insight 角色 API 密钥")
     INSIGHT_ENGINE_BASE_URL: Optional[str] = Field(
@@ -55,13 +53,6 @@ class Settings(BaseSettings):
     HOST_MODEL_NAME: Optional[str] = Field(None, description="HostAgent 模型名")
     HOST_MODEL_PROVIDER: str = Field("openai", description="HostAgent 厂商(langchain provider)")
 
-    SEARCH_SWITCH: Literal["TavilyAPI", "AnspireAPI"] = Field(
-        "TavilyAPI", description="Web 搜索提供方"
-    )
-    TAVILY_API_KEY: Optional[str] = Field(None, description="Tavily API 密钥")
-    TAVILY_BASE_URL: Optional[str] = Field(
-        "https://api.tavily.com/search", description="TAVILY BaseUrl"
-    )
     ANSPIRE_API_KEY: Optional[str] = Field(None, description="Anspire API 密钥")
     ANSPIRE_BASE_URL: Optional[str] = Field(
         "https://plugin.anspire.cn/api/ntsearch/search", description="Anspire BaseUrl"
@@ -85,7 +76,6 @@ class Settings(BaseSettings):
         None, description="Embedding 模型运行设备，例如 'cuda' 或 'cpu'"
     )
     INSIGHT_DENSE_DIM: int = Field(1024, description="BGE-M3 稠密向量维度")
-    INSIGHT_VECTOR_TOP_K: int = Field(80, description="Milvus 每个检索通道的召回数量(Top K)")
     INSIGHT_VECTOR_FILTER_DAYS: int = Field(
         365, description="Milvus 检索的时间窗口天数限制；小于等于0则禁用时间过滤"
     )
@@ -93,13 +83,13 @@ class Settings(BaseSettings):
         True, description="是否为 InsightAgent 启用章节语义路由"
     )
     INSIGHT_SEMANTIC_ROUTING_MODEL: Optional[str] = Field(
-        None, description="用于章节语义路由的 SentenceTransformer 模型路径或名称"
+        "BAAI/bge-small-zh-v1.5", description="用于章节语义路由的 SentenceTransformer 模型路径或名称"
     )
     model_config = SettingsConfigDict(
         env_file=ENV_FILE,
         env_prefix="",
         case_sensitive=False,
-        extra="allow",
+        extra="ignore",
     )
 
 

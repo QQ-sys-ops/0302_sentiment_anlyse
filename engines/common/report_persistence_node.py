@@ -4,26 +4,26 @@ from loguru import logger
 
 from engines.common.reports import save_report
 from engines.common.research_graph_runtime import ResearchNode
-from engines.contracts.agent_roles import ROLE_INFOS
+from engines.contracts.agent_roles import role_display_name
 from engines.contracts.research_graph_state import ResearchGraphState
 
 
 class ReportPersistenceNode(ResearchNode):
-    """将 Agent 独立报告落盘并注册到研究运行。"""
+    """将 Agent 独立报告落盘并注册到研究运行"""
 
     async def __call__(self, state: ResearchGraphState[Any]) -> dict[str, Any]:
-        role = state['role']
-        role_info = ROLE_INFOS[role]
-        logger.info(f"{role_info.agent_name} 开始进行独立报告落盘")
-
+        """将研究状态中的独立报告保存到文件。"""
+        agent_name = role_display_name(state["role"])
+        self.context.report_progress("completed", f"{agent_name} 开始保存独立报告", 90)
 
         final_report = state["final_report"]
 
         md_path = save_report(
             self.context.output_dir,
-            f"{state['query']}_report.md",
-            final_report,
+            "report.md",
+            final_report
         )
 
-        logger.info(f"{role_info.agent_name} 独立报告落盘完成：{md_path}")
+        logger.info(f"【{agent_name}】报告落盘完成: {md_path}")
+        self.context.report_progress("completed", f"{agent_name} 独立报告保存完成", 100)
         return {}

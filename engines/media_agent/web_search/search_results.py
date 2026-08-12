@@ -27,7 +27,7 @@ SEARCH_TOOL_DESCRIPTIONS: dict[SearchTool, str] = {
 
 @dataclass(frozen=True, slots=True)
 class WebpageResult:
-    """单条网页检索结果的领域模型。"""
+    """单条网页检索结果的领域模型"""
 
     title: str
     url: str
@@ -38,6 +38,6 @@ class WebpageResult:
 
 @dataclass(frozen=True, slots=True)
 class SearchProviderResponse:
-    """Provider 检索结果的统一响应模型。"""
+    """Provider 检索结果的统一响应模型"""
     query: str
     webpages: list[WebpageResult] = field(default_factory=list)

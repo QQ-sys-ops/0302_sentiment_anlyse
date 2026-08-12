@@ -2,11 +2,11 @@ from typing import Literal
 from dataclasses import dataclass
 
 RoleKey = Literal["insight", "media", "host", "report"]
-
+RESEARCH_ROLE_KEYS: tuple[RoleKey, ...] = ("insight", "media")
 
 @dataclass(slots=True)
 class RoleInfo:
-    confix_prefix: str  # 角色的配置前缀
+    confix_prefix: str
     agent_name: str
 
 
@@ -19,5 +19,5 @@ ROLE_INFOS: dict[RoleKey, RoleInfo] = {
 
 
 def role_display_name(role_key: RoleKey) -> str:
-    """返回角色的中文展示名。"""
+    """返回角色的中文展示名"""
     return ROLE_INFOS[role_key].agent_name

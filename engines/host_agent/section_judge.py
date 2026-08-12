@@ -12,7 +12,7 @@ from engines.prompts.host import (
 
 
 class HostSectionJudge:
-    """调用 Host LLM 对 Insight 与 Media 的同章节输出进行研判。"""
+    """调用 Host LLM 对 Insight 与 Media 的同章节输出进行研判"""
 
     llm_client: LLMClient = LLMClient.from_role("host")
 
@@ -20,7 +20,7 @@ class HostSectionJudge:
             self,
             section_pair: AgentSectionPair
     ) -> SectionJudgement:
-        """生成单章节结构化研判。"""
+        """生成单章节结构化研判"""
 
         judgement_evidence = self._build_judgement_context(section_pair)
 
@@ -40,7 +40,7 @@ class HostSectionJudge:
             self,
             section_pair: AgentSectionPair,
     ) -> str:
-        """组装当前双 Agent 的同章节输出。"""
+        """组装当前双 Agent 的同章节输出"""
         judgement_context = {
             "section": {
                 "key": section_pair.section_key,

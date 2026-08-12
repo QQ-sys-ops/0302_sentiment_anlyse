@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Query
+from fastapi import APIRouter
 
 from app.dependencies import HostServiceDep
 from app.schemas.host_schema import HostDiscussionRecordsResponse
@@ -11,6 +11,6 @@ def get_host_discussion_records_endpoint(
         service: HostServiceDep,
         task_id: str
 ):
-    """返回讨论区发言记录。"""
+    """返回讨论区发言记录"""
     discussion_records = service.get_discussion_records(task_id)
     return HostDiscussionRecordsResponse(**discussion_records)

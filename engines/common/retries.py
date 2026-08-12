@@ -5,22 +5,17 @@ from loguru import logger
 
 
 class RetryConfig:
-    max_retries: int = 3  # 最多重试次数
-    init_delay: float = 1.0  # 初始重试时间
+    max_retries: int = 3
+    init_delay: float = 1.0
     max_delay: float = 60.0
-    backoff_factor: float = 2.0  # 回退因子（指数增长）  前面几次重试间隔应该要短一些 后面随着重试次数在增加，间隔长一些
+    backoff_factor: float = 2.0
 
     def _get_delay(self, attempt: int) -> float:
+        """计算指定重试次数对应的退避延迟"""
         return min(self.init_delay * 2 ** attempt, self.max_delay)
 
     def _is_no_retrable(self, exec: Exception) -> bool:
-        """
-        是否能重试
-        :param exec:
-        :return:
-        429:限流
-
-        """
+        """是否能重试"""
         status_code = getattr(exec, 'status_code', None)
         if status_code is None:
             status_code = getattr(getattr(exec, 'response', None), 'status_code', None)
@@ -30,31 +25,21 @@ class RetryConfig:
                         fun_name: str,
                         attempt: int,
                         exec: Exception) -> float | None:
+        """判断是否继续重试并返回下一次延迟"""
 
-        # 1. 不可以重试
         if self._is_no_retrable(exec) or attempt >= self.max_retries:
             return None
-
-        # 2. 计算下一次延时事件
         delay = self._get_delay(attempt)
-
         current_try = attempt + 1
         next_try = current_try + 1
         logger.warning(f"函数 {fun_name} 第 {current_try} 次尝试失败: {exec}")
         logger.info(f"将在 {delay:.1f} 秒后进行第 {next_try} 次尝试...")
-        # 3. 返回延时
         return delay
 
 
 retry_config = RetryConfig()
-
-
 def with_retry(func):
-    """
-    闭包使用
-    :param func:
-    :return:
-    """
+    """闭包使用"""
     if not asyncio.iscoroutinefunction(func):
         raise TypeError(
             "重试装饰器只能装饰 async 函数,"
@@ -62,6 +47,7 @@ def with_retry(func):
         )
     @wraps(func)
     async def wrapper(*args, **kwargs):
+        """执行带退避延迟的异步函数重试"""
         for attempt in range(retry_config.max_retries+1):
           try:
               return  await  func(*args, **kwargs)

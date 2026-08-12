@@ -1,4 +1,4 @@
-"""Milvus 集合 schema 与索引参数的构建器。"""
+"""Milvus 集合 schema 与索引参数的构建器"""
 from dataclasses import fields
 from typing import Any
 
@@ -14,18 +14,19 @@ MILVUS_OUTPUT_FIELDS: list[str] = [
     "content",
     "published_at",
     *(metric_field.name for metric_field in fields(Engagement)),
-    "hotness_score",
+    "hotness_score"
 ]
 
 class CollectionSchemaBuilder:
-    """构建 Milvus 集合的 schema 与索引参数。"""
+    """构建 Milvus 集合的 schema 与索引参数"""
 
     def __init__(self, milvus_client: Any, dense_vector_dimension: int) -> None:
+        """保存 Milvus 客户端与稠密向量维度"""
         self._milvus_client = milvus_client
         self._dense_vector_dimension = dense_vector_dimension
 
     def build_collection_schema(self) -> Any:
-        """定义 Milvus 集合字段与混合向量列结构。"""
+        """定义 Milvus 集合字段与混合向量列结构"""
         collection_schema = self._milvus_client.create_schema(
             auto_id=False, enable_dynamic_field=False,
         )
@@ -47,7 +48,7 @@ class CollectionSchemaBuilder:
         return collection_schema
 
     def build_index_parameters(self) -> Any:
-        """配置稠密/稀疏向量列的索引类型与度量。"""
+        """配置稠密/稀疏向量列的索引类型与度量"""
         index_parameters = self._milvus_client.prepare_index_params()
         index_parameters.add_index(
             field_name="dense_vector",

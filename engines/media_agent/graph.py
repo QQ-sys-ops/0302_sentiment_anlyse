@@ -7,18 +7,18 @@ from engines.common.report_persistence_node import ReportPersistenceNode
 from engines.common.research_graph_runtime import (
     SECTION_SUMMARY_LOOP_MAPPING,
     ResearchRunContext,
-    route_after_section_summary,
+    route_after_section_summary
 )
 from engines.media_agent.nodes import (
     SearchNode,
     SearchPlanningNode,
-    SectionSummaryNode,
+    SectionSummaryNode
 )
 from engines.media_agent.state import MediaState
 
 
 def build_graph(ctx: ResearchRunContext) -> Any:
-    """编排规划、检索、摘要、排版与落盘节点。"""
+    """编排规划、检索、摘要、排版与落盘节点"""
     graph = StateGraph(MediaState)  # type: ignore
     graph.add_node("plan_search", SearchPlanningNode(ctx))  # type: ignore
     graph.add_node("search", SearchNode(ctx))  # type: ignore
@@ -31,7 +31,7 @@ def build_graph(ctx: ResearchRunContext) -> Any:
     graph.add_conditional_edges(
         "summarize_sections",
         route_after_section_summary,
-        SECTION_SUMMARY_LOOP_MAPPING,
+        SECTION_SUMMARY_LOOP_MAPPING
     )
     graph.add_edge("generate_agent_report", "persist_agent_report")
     graph.add_edge("persist_agent_report", END)

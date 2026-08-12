@@ -1,4 +1,4 @@
-"""研究 Agent 图的共享上下文、节点基类与执行辅助。"""
+"""研究 Agent 图的共享上下文、节点基类与执行辅助"""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -9,7 +9,7 @@ from engines.contracts.agent_roles import RoleKey
 
 @dataclass(slots=True)
 class ProgressUpdate:
-    """节点进度更新载荷。"""
+    """节点进度更新载荷"""
 
     status: str
     message: str
@@ -21,7 +21,7 @@ ProgressCallback = Callable[[ProgressUpdate], None]
 
 @dataclass(slots=True)
 class ResearchRunContext:
-    """单次 Insight/Media 研究运行所需的共享依赖与元数据。"""
+    """单次 Insight/Media 研究运行所需的共享依赖与元数据"""
     task_id: str
     role: RoleKey
     llm_client: LLMClient
@@ -29,15 +29,15 @@ class ResearchRunContext:
     progress_callback: ProgressCallback
 
     def report_progress(self, status: str, message: str, pct: int) -> None:
-        """存在回调时上报当前节点执行进度。"""
-        if self.progress_callback:
-            self.progress_callback(ProgressUpdate(status, message, pct))
+        """存在回调时上报当前节点执行进度"""
+        self.progress_callback(ProgressUpdate(status, message, pct))
 
 
 class ResearchNode(ABC):
-    """研究 Agent 图节点抽象基类。"""
+    """研究 Agent 图节点抽象基类"""
 
-    def __init__(self, context: ResearchRunContext) -> None:
+    def __init__(self, context: ResearchRunContext):
+        """初始化研究节点的共享运行上下文"""
         self.context = context
 
     @abstractmethod
@@ -49,15 +49,15 @@ class ResearchNode(ABC):
 async def handle_research_graph(
         context: ResearchRunContext,
         graph: Any,
-        query: str,
+        query: str
 ):
-    """以统一初始状态执行研究 Agent 的 LangGraph。"""
+    """以统一初始状态执行研究 Agent 的 LangGraph"""
     initial_state = {"task_id": context.task_id, "query": query, "role": context.role}
     await graph.ainvoke(initial_state)
 
 
 def route_after_section_summary(state: Mapping[str, Any]) -> str:
-    """按游标判断继续下一章节摘要或全部完成。"""
+    """按游标判断继续下一章节摘要或全部完成"""
     cursor = state.get("cursor", 0)
     sections = state.get("sections")
     return "next_section" if cursor < len(sections) else "all_done"
@@ -65,5 +65,5 @@ def route_after_section_summary(state: Mapping[str, Any]) -> str:
 
 SECTION_SUMMARY_LOOP_MAPPING = {
     "next_section": "summarize_sections",
-    "all_done": "generate_agent_report",
+    "all_done": "generate_agent_report"
 }

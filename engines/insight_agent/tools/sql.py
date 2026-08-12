@@ -1,9 +1,10 @@
-"""固定四表检索 SQL。"""
+"""固定四表检索 SQL"""
 
 from sqlalchemy import text
 
 
 def db_sql_statement():
+    """构建固定四表的关键词检索 SQL"""
     return text("""
         SELECT * FROM (
             SELECT 'douyin' AS platform, 'douyin_aweme' AS source_table, id AS mysql_primary_key, title AS title_or_content, create_time AS published_at,
@@ -32,6 +33,7 @@ def db_sql_statement():
 
 
 def vector_sql_statement():
+    """构建固定四表的向量同步 SQL"""
     return text("""
         SELECT 'douyin' AS platform, 'douyin_aweme' AS source_table, id AS mysql_primary_key, title AS content, create_time AS published_at,
             liked_count AS eng_likes, comment_count AS eng_comments, share_count AS eng_shares, collected_count AS eng_collects, 0 AS eng_replies,

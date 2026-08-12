@@ -1,4 +1,4 @@
-"""固定报告章节配置与检索路由规则。"""
+"""固定报告章节配置与检索路由规则"""
 
 from dataclasses import dataclass
 
@@ -7,7 +7,7 @@ from engines.contracts.agent_roles import  RoleKey
 
 @dataclass(slots=True)
 class SectionDefinition:
-    """固定章节标题、角色写作指导与私域路由关键词。"""
+    """固定章节标题、角色写作指导与私域路由关键词"""
 
     key: str
     title: str
@@ -16,7 +16,7 @@ class SectionDefinition:
     insight_routing_keywords: tuple[str, ...] = ()
 
     def section_guidance_for(self, role: RoleKey) -> str:
-        """返回研究角色对应的章节写作指导。"""
+        """返回研究角色对应的章节写作指导"""
         if role == "insight":
             return self.insight_section_guidance
         if role == "media":
@@ -75,7 +75,7 @@ SECTION_DEFINITIONS: dict[str, SectionDefinition] = {
             "扩散",
             "引爆",
             "冲上热搜",
-        ),
+        )
     ),
     "sentiment_and_opinion": SectionDefinition(
         key="sentiment_and_opinion",
@@ -106,7 +106,7 @@ SECTION_DEFINITIONS: dict[str, SectionDefinition] = {
             "抵制",
             "期待",
             "嘲讽",
-        ),
+        )
     ),
     "platform_and_group_diff": SectionDefinition(
         key="platform_and_group_diff",
@@ -133,7 +133,7 @@ SECTION_DEFINITIONS: dict[str, SectionDefinition] = {
             "年轻人",
             "从业者",
             "当地居民",
-        ),
+        )
     ),
     "deep_causes_and_impact": SectionDefinition(
         key="deep_causes_and_impact",
@@ -164,30 +164,30 @@ SECTION_DEFINITIONS: dict[str, SectionDefinition] = {
             "长期影响",
             "监管",
             "问责",
-        ),
+        )
     ),
 }
 
 
 def find_section_definition(key: str) -> SectionDefinition | None:
-    """按键名查找固定章节定义,未知键返回 None。"""
+    """按键名查找固定章节定义"""
     return SECTION_DEFINITIONS.get(key)
 
 
 def get_section_definitions_for_role(role: RoleKey) -> list[dict[str, str]]:
-    """返回指定研究角色的固定章节与规划指导。"""
+    """返回指定研究角色的固定章节与规划指导"""
     return [
         {
             "section_key": section.key,
             "title": section.title,
-            "section_guidance": section.section_guidance_for(role),
+            "section_guidance": section.section_guidance_for(role)
         }
         for section in SECTION_DEFINITIONS.values()
     ]
 
 
 def get_insight_routing_rules() -> dict[str, tuple[str, ...]]:
-    """提取各章节的私域证据路由关键词。"""
+    """提取各章节的私域证据路由关键词"""
     return {
         section.key: section.insight_routing_keywords
         for section in SECTION_DEFINITIONS.values()

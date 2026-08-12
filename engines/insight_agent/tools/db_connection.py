@@ -1,4 +1,4 @@
-"""MySQL 异步引擎与会话工厂的生命周期管理。"""
+"""MySQL 异步引擎与会话工厂的生命周期管理"""
 from typing import Optional
 
 from sqlalchemy.engine import URL
@@ -6,13 +6,16 @@ from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     AsyncSession,
     async_sessionmaker,
-    create_async_engine,
+    create_async_engine
 )
 from engines.contracts.settings import get_settings
+
+
 class DataBaseConnectionManager:
     """封装 MySQL 异步引擎与会话工厂与释放"""
 
-    def __init__(self) -> None:
+    def __init__(self):
+        """初始化数据库配置及异步连接资源"""
         self._settings = get_settings()
         self._async_engine: Optional[AsyncEngine] = None
         self._async_session_factory: Optional[async_sessionmaker[AsyncSession]] = None
@@ -22,7 +25,7 @@ class DataBaseConnectionManager:
         if self._async_engine is None:
             self._async_engine = create_async_engine(
                 url=self._build_db_url(),
-                echo=False,
+                echo=False
             )
         return self._async_engine
 
@@ -31,11 +34,11 @@ class DataBaseConnectionManager:
         if self._async_session_factory is None:
             self._async_session_factory = async_sessionmaker(
                 self.get_async_engine(),
-                expire_on_commit=False,
+                expire_on_commit=False
             )
         return self._async_session_factory
 
-    async def dispose_engine(self) -> None:
+    async def dispose_engine(self):
         """释放异步引擎与会话工厂"""
         self._async_session_factory = None
         if self._async_engine is not None:
@@ -45,7 +48,7 @@ class DataBaseConnectionManager:
                 self._async_engine = None
 
     def _build_db_url(self) -> URL:
-        """依据配置项拼接 MySQL 异步连接 URL。"""
+        """依据配置项拼接 MySQL 异步连接 URL"""
         settings = get_settings()
         return URL.create(
             drivername="mysql+aiomysql",
@@ -53,7 +56,7 @@ class DataBaseConnectionManager:
             password=settings.DB_PASSWORD,
             host=settings.DB_HOST,
             port=settings.DB_PORT,
-            database=settings.DB_NAME,
+            database=settings.DB_NAME
         )
 
 

@@ -17,9 +17,11 @@ class DocumentRecordReader:
             self,
             connection_manager: DataBaseConnectionManager = connection_manager,
     ):
+        """初始化文档读取器及其数据库连接管理器"""
         self._connection_manager = connection_manager
 
     async def read_all_documents(self) -> list[EvidenceDocument]:
+        """读取并映射全部可用数据库文档"""
         async with self._connection_manager.get_async_engine().connect() as connection:
             result = await connection.execute(vector_sql_statement())
             rows = result.mappings().all()
@@ -27,6 +29,7 @@ class DocumentRecordReader:
 
     @staticmethod
     def _map_row_to_document(row: Mapping[str, Any]) -> EvidenceDocument | None:
+        """将数据库行映射为有效的证据文档"""
         content = row.get("content")
         published_at = datetime.fromtimestamp(int(row.get("published_at")))
         if not content.strip():

@@ -12,22 +12,23 @@ from engines.insight_agent.tools.search_results import EvidenceDocument, SearchH
 from engines.insight_agent.tools.vector.embedder import VectorEmbedder
 from engines.insight_agent.tools.vector.builder import (
     CollectionSchemaBuilder,
-    MILVUS_OUTPUT_FIELDS,
+    MILVUS_OUTPUT_FIELDS
 )
 
 
 class VectorSearchRepository:
-    """Milvus 数据仓储：提供写文档、混合检索及封装数据结果。"""
+    """Milvus 数据仓储：提供写文档、混合检索及封装数据结果"""
 
     def __init__(self):
+        """初始化向量仓储配置、编码器与客户端状态"""
         self._settings = get_settings()
-        self.collection_name= self._settings.MILVUS_INSIGHT_COLLECTION
+        self.collection_name = self._settings.MILVUS_INSIGHT_COLLECTION
         self._embedder = VectorEmbedder()
         self._milvus_client: MilvusClient | None = None
 
     @property
     def milvus_client(self) -> MilvusClient:
-        """懒加载 Milvus 客户端。"""
+        """懒加载 Milvus 客户端"""
         if self._milvus_client is None:
             self._milvus_client = MilvusClient(
                 uri=self._settings.MILVUS_URI,
@@ -35,16 +36,16 @@ class VectorSearchRepository:
             )
         return self._milvus_client
 
-    def close(self) -> None:
-        """释放资源。"""
+    def close(self):
+        """释放资源"""
         if self._milvus_client is not None:
             try:
                 self._milvus_client.close()
             finally:
                 self._milvus_client = None
 
-    def ensure_collection(self, drop_existing: bool = False) -> None:
-        """确保 Milvus 集合存在。"""
+    def ensure_collection(self, drop_existing: bool = False):
+        """确保 Milvus 集合存在"""
         client = self.milvus_client
         if drop_existing and client.has_collection(self.collection_name):
             client.drop_collection(self.collection_name)
@@ -63,7 +64,7 @@ class VectorSearchRepository:
     # ==================== 1. 写操作====================
 
     def upsert_documents(self, documents: list[EvidenceDocument]) -> int:
-        """批量向量化并写入 Milvus 集合。"""
+        """批量向量化并写入 Milvus 集合"""
 
         self.ensure_collection()
         embeddings = self._embedder.encode(doc.content for doc in documents)
@@ -87,14 +88,14 @@ class VectorSearchRepository:
     def _to_milvus_entity(
             document: EvidenceDocument,
             dense_vector: list[float],
-            sparse_vector: dict[int, float],
+            sparse_vector: dict[int, float]
     ) -> dict[str, Any]:
-        """将统一文档模型转为 Milvus 实体字典。"""
+        """将统一文档模型转为 Milvus 实体字典"""
         return {
             "platform": document.platform,
             "source_table": document.source_table,
             "doc_id": document.doc_id,
-            "mysql_primary_key": document.mysql_primary_key,
+            "mysql_primary_key": document.source_id,
             "content": document.content,
             "published_at": int(document.published_at.timestamp()),
             **{
@@ -114,7 +115,7 @@ class VectorSearchRepository:
             self,
             query: str,
             limit: int,
-            filter_expression: str | None = None,
+            filter_expression: str | None = None
     ) -> list[SearchHit]:
         """按查询内容进行双通道混合检索"""
         if not self.milvus_client.has_collection(self.collection_name):
@@ -129,7 +130,7 @@ class VectorSearchRepository:
             self,
             query_embedding: tuple[list[float], dict[int, float]],
             limit: int,
-            filter_expression: str | None,
+            filter_expression: str | None
     ) -> list[SearchHit]:
         """执行稠密-稀疏双路 AnnSearch 并通过 RRF 融合"""
         dense_vector, sparse_vector = query_embedding
@@ -140,21 +141,21 @@ class VectorSearchRepository:
             anns_field="dense_vector",
             param={"metric_type": "COSINE"},
             limit=limit,
-            **request_filter,
+            **request_filter
         )
         sparse_request = AnnSearchRequest(
             data=[sparse_vector],
             anns_field="sparse_vector",
             param={"metric_type": "IP"},
             limit=limit,
-            **request_filter,
+            **request_filter
         )
         raw_result = self.milvus_client.hybrid_search(
             collection_name=self.collection_name,
             reqs=[dense_request, sparse_request],
             ranker=RRFRanker(),
             limit=limit,
-            output_fields=MILVUS_OUTPUT_FIELDS,
+            output_fields=MILVUS_OUTPUT_FIELDS
         )
         return self._map_hits(raw_result)
 
@@ -185,27 +186,7 @@ class VectorSearchRepository:
                             for metric_field in fields(Engagement)
                         },
                         hotness_score=entity["hotness_score"],
-                    ),
+                    )
                 )
             )
         return hits
-
-
-
-if __name__ == "__main__":
-    repo = VectorSearchRepository()
-    try:
-        test_query = "高考难不难"
-        top_k = 3
-        hits = repo.vector_call(query=test_query, limit=top_k)
-        for idx, hit in enumerate(hits, start=1):
-            doc = hit.retrieval_document
-            print(f"[{idx}] 得分 (Distance/Score): {hit.retrieval_score:.4f}")
-            print(f"    平台: {doc.platform} | 数据库主键: {doc.mysql_primary_key}")
-            print(f"    发布时间: {doc.published_at}")
-            print(f"    热度得分: {doc.hotness_score}")
-            print(f"    内容摘要: {doc.content[:50]}...")
-            print("-" * 50)
-    finally:
-        repo.close()
-        logger.info("已关闭 Milvus 客户端连接")

@@ -2,27 +2,25 @@ import asyncio
 from itertools import zip_longest
 from typing import Any
 
-from loguru import logger
-
 from engines.common.research_graph_runtime import ResearchNode, ResearchRunContext
-from engines.contracts.agent_roles import ROLE_INFOS
+from engines.contracts.agent_roles import role_display_name
 from engines.contracts.evidence import EvidenceRecord
 from engines.media_agent.state import MediaSectionState, MediaState
 from engines.media_agent.web_search.retrieval_service import MediaRetrievalService
 
 
 class SearchNode(ResearchNode):
-    """遍历章节组合关键词检索并聚合去重证据。"""
+    """遍历章节组合关键词检索并聚合去重证据"""
 
     def __init__(self, context: ResearchRunContext) -> None:
+        """初始化检索节点及媒体检索服务"""
         super().__init__(context)
         self._retrieval_service = MediaRetrievalService()
 
     async def __call__(self, state: MediaState) -> dict[str, Any]:
-        """遍历章节执行检索并去重产出证据池。"""
-        role = state['role']
-        role_info = ROLE_INFOS[role]
-        logger.info(f"【{role_info.agent_name}】开始执行公域信息搜索")
+        """遍历章节执行检索并去重产出证据池"""
+        agent_name = role_display_name(state["role"])
+        self.context.report_progress("searching", f"{agent_name} 开始执行公域信息搜索", 30)
 
         query = state.get("query")
         sections: list[MediaSectionState] = state.get("sections")
@@ -44,7 +42,7 @@ class SearchNode(ResearchNode):
             section_queries.append(
                 "\n".join(f"[{tool}] {search_query}" for search_query in queries)
             )
-        logger.info(f"【{role_info.agent_name}】执行公域信息搜索完成")
+        self.context.report_progress("searching", f"{agent_name} 执行公域信息搜索完成", 40)
         return {
             "section_evidence_records": section_evidence_records,
             "section_queries": section_queries,
@@ -54,7 +52,7 @@ class SearchNode(ResearchNode):
 def _merge_query_results(
         query_results: list[list[EvidenceRecord]],
 ) -> list[EvidenceRecord]:
-    """各查询内按相关分降序排列，再轮询合并并按证据 ID 去重。"""
+    """各查询内按相关分降序排列，再轮询合并并按证据 ID 去重"""
     selected: list[EvidenceRecord] = []
     seen_ids: set[str] = set()
     ranked_results = [
@@ -72,15 +70,3 @@ def _merge_query_results(
             seen_ids.add(record.id)
             selected.append(record)
     return selected
-
-
-if __name__ == '__main__':
-
-    list1=[1,2,3,4]
-    list2=["a","d","c"]
-
-
-    for  data  in  zip_longest(list1,list2):
-        print(data)   # (1,"a") (2,"d") (3,"c") (4,None)
-
-

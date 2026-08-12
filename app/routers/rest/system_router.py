@@ -4,16 +4,17 @@ from app.dependencies import SystemConfigServiceDep
 
 router = APIRouter(prefix="/api/config", tags=["配置信息接口层"])
 
+
 @router.get(path="", response_model=ConfigResponse)
 def get_config_info_endpoint(service: SystemConfigServiceDep):
+    """返回当前系统配置信息"""
     config_info_dict = service.get_config_info()
-    raise ValueError(f"出错了")
-    # return ConfigResponse(config=config_info_dict)
+    return ConfigResponse(config=config_info_dict)
 
 
 @router.post(path="")
 def update_config_info_endpoint(
         config_request: ConfigUpdateRequest,
         service: SystemConfigServiceDep):
-
-    service.update_config_info(config_request.root)  # 从root中获取
+    """更新系统配置信息。"""
+    service.update_config_info(config_request.root)

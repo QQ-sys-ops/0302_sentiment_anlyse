@@ -13,6 +13,7 @@ class DocumentRecordSynchronizer:
     """的知识库同步器"""
 
     def __init__(self) -> None:
+        """初始化向量仓储与源文档读取器"""
         self._vector_repository = VectorSearchRepository()
         self._source_reader = DocumentRecordReader()
 
@@ -30,6 +31,7 @@ class DocumentRecordSynchronizer:
 
 
 async def main():
+    """执行 Milvus 知识库全量同步测试"""
     logger.info("开始启动 Milvus 知识库全量同步测试...")
     synchronizer = DocumentRecordSynchronizer()
     try:
